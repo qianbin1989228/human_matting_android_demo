@@ -1,0 +1,2 @@
+# human_matting_android_demo
+基于PaddleSeg的ModNet算法实现人像抠图（安卓版demo）
