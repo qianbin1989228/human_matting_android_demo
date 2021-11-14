@@ -4,22 +4,24 @@
 可以直接下载安装本示例工程中的[apk](./app-debug.apk)进行体验。
 
 ## 1. 效果展示
-<center>
-<img src="figures/human.jpg"  width="50%">
+<div align="center">
+<img src="figures/human.jpg"  width="50%"> 
 
 原图
+</div>
 
+<div align="center">
 <img src="figures/bg.jpg"  width="50%" >
 
 新背景
 
-</center>
+</div>
 
 在手机上进行人像抠图然后再替换背景：
 
-<center>
+<div align="center">
 <img src="figures/demo.jpg"  width="50%" >
-</center>
+</div>
 
 
 ## 2. 安卓Demo使用说明
