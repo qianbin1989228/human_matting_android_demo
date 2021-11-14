@@ -72,13 +72,11 @@ Paddle-Lite在安卓端的预测库主要包括三个文件：
 准备好上述文件，即可参考[java_api](https://paddle-lite.readthedocs.io/zh/release-v2.8/api_reference/java_api_doc.html)在安卓端进行推理。具体使用预测库的方法可参考[Paddle-Lite-Demo](https://github.com/PaddlePaddle/Paddle-Lite-Demo)中更新预测库部分的文档。
 
 ### 3.2 模型导出
-此demo的人像抠图采用Backbone为HRNet_W18的MODNet模型），模型[训练教程](https://github.com/PaddlePaddle/PaddleSeg/tree/develop/contrib/Matting)请参考官网，官网提供了3种不同性能的Backone：MobileNetV2、ResNet50_vd和HRNet_W18。本安卓demo综合考虑精度和速度要求，采用了HRNet_W18作为Backone。可以直接从官网下载训练好的动态图模型进行算法验证。
+此demo的人像抠图采用Backbone为HRNet_W18的MODNet模型，模型[训练教程](https://github.com/PaddlePaddle/PaddleSeg/tree/develop/contrib/Matting)请参考官网，官网提供了3种不同性能的Backone：MobileNetV2、ResNet50_vd和HRNet_W18。本安卓demo综合考虑精度和速度要求，采用了HRNet_W18作为Backone。可以直接从官网下载训练好的动态图模型进行算法验证。
 
 为了能够在安卓手机上进行推理，需要将动态图模型导出为静态图模型，导出时固定图像输入尺寸即可。
 
-首先git最新的[PaddleSeg](https://github.com/paddlepaddle/paddleseg/tree/develop)项目，然后cd进入到PaddleSeg/contrib/Matting目录。
-
-将下载下来的modnet-hrnet_w18.pdparams动态图模型文件（也可以自行训练得到）放置在当前文件夹（PaddleSeg/contrib/Matting）下面。然后修改配置文件 configs/modnet_mobilenetv2.yml(注意：虽然采用hrnet18模型，但是该模型依赖的配置文件modnet_hrnet_w18.yml本身依赖modnet_mobilenetv2.yml),修改其中的val_dataset字段如下：
+首先git最新的[PaddleSeg](https://github.com/paddlepaddle/paddleseg/tree/develop)项目，然后cd进入到PaddleSeg/contrib/Matting目录。将下载下来的modnet-hrnet_w18.pdparams动态图模型文件（也可以自行训练得到）放置在当前文件夹（PaddleSeg/contrib/Matting）下面。然后修改配置文件 configs/modnet_mobilenetv2.yml(注意：虽然采用hrnet18模型，但是该模型依赖的配置文件modnet_hrnet_w18.yml本身依赖modnet_mobilenetv2.yml),修改其中的val_dataset字段如下：
 
 ``` yml
 val_dataset:
@@ -95,7 +93,7 @@ val_dataset:
   mode: val
   get_trimap: False
 ```
-上述修改中尤其注意short_size: 256这个字段，这个值直接决定我们最终的推理图像采用的尺寸大小。这个字段值设置太小会影响预测精度，设置太大会影响手机推理速度（甚至造成手机因性能问题无法完成推理而奔溃），经过实际测试，对于hrnet18，该字段设置为256较好。
+上述修改中尤其注意short_size: 256这个字段，这个值直接决定我们最终的推理图像采用的尺寸大小。这个字段值设置太小会影响预测精度，设置太大会影响手机推理速度（甚至造成手机因性能问题无法完成推理而奔溃）。经过实际测试，对于hrnet18，该字段设置为256较好。
 
 完成配置文件修改后，采用下面的命令进行静态图导出：
 ``` shell
@@ -105,7 +103,7 @@ python export.py \
     --save_dir output
 ```
 
-转换完成后在当前目录下会生成output文件夹，该文件夹中即为转出来的静态图文件。
+转换完成后在当前目录下会生成output文件夹，该文件夹中的文件即为转出来的静态图文件。
 
 ### 3.3 模型转换
 
