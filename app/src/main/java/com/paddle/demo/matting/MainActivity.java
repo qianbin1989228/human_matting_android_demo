@@ -3,6 +3,7 @@ package com.paddle.demo.matting;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -11,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -22,6 +24,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,6 +37,8 @@ import com.paddle.demo.matting.preprocess.Preprocess;
 import com.paddle.demo.matting.visual.Visualize;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -74,6 +79,9 @@ public class MainActivity extends AppCompatActivity {
     Preprocess preprocess = new Preprocess();
 
     Visualize visualize = new Visualize();
+
+    //定义图像存储路径
+    Uri photoUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -319,10 +327,42 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private Bitmap getBitMapFromPath(String imageFilePath) {
+        Display currentDisplay = getWindowManager().getDefaultDisplay();
+        int dw = currentDisplay.getWidth();
+        int dh = currentDisplay.getHeight();
+        // Load up the image's dimensions not the image itself
+        BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
+        bmpFactoryOptions.inJustDecodeBounds = true;
+        Bitmap bmp = BitmapFactory.decodeFile(imageFilePath, bmpFactoryOptions);
+        int heightRatio = (int) Math.ceil(bmpFactoryOptions.outHeight
+                / (float) dh);
+        int widthRatio = (int) Math.ceil(bmpFactoryOptions.outWidth
+                / (float) dw);
+
+        // If both of the ratios are greater than 1,
+        // one of the sides of the image is greater than the screen
+        if (heightRatio > 1 && widthRatio > 1) {
+            if (heightRatio > widthRatio) {
+                // Height ratio is larger, scale according to it
+                bmpFactoryOptions.inSampleSize = heightRatio;
+            } else {
+                // Width ratio is larger, scale according to it
+                bmpFactoryOptions.inSampleSize = widthRatio;
+            }
+        }
+        // Decode it for real
+        bmpFactoryOptions.inJustDecodeBounds = false;
+        bmp = BitmapFactory.decodeFile(imageFilePath, bmpFactoryOptions);
+        return bmp;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && data != null) {
+        //if (resultCode == RESULT_OK && data != null) {
+        if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case OPEN_GALLERY_REQUEST_CODE:
                     try {
@@ -339,9 +379,22 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                 case TAKE_PHOTO_REQUEST_CODE:
-                    Bitmap image = (Bitmap) data.getParcelableExtra("data");
+                    //Bitmap image = (Bitmap) data.getParcelableExtra("data");//获取缩略图
+                    Bitmap image = null;
+                    if (photoUri == null)
+                        return;
+                    //通过Uri和selection来获取真实的图片路径
+                    Cursor cursor = getContentResolver().query(photoUri, null, null, null, null);
+                    if (cursor != null) {
+                        if (cursor.moveToFirst()){
+                            String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                            //获得图片
+                            image = getBitMapFromPath(path);
+                        }
+                        cursor.close();
+                    }
+                    photoUri = null;
                     onImageChanged(image);
-
                     break;
                 default:
                     break;
@@ -369,6 +422,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void takePhoto() {
         Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        ContentValues values = new ContentValues();
+        photoUri = getContentResolver().insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        takePhotoIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, photoUri);
         if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePhotoIntent, TAKE_PHOTO_REQUEST_CODE);
         }
