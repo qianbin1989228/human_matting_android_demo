@@ -170,12 +170,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadModel() {
-        pbLoadModel = ProgressDialog.show(this, "", "Loading model...", false, false);
+        pbLoadModel = ProgressDialog.show(this, "", "加载模型中...", false, false);
         sender.sendEmptyMessage(REQUEST_LOAD_MODEL);
     }
 
     public void runModel() {
-        pbRunModel = ProgressDialog.show(this, "", "Running model...", false, false);
+        pbRunModel = ProgressDialog.show(this, "", "推理中...", false, false);
         sender.sendEmptyMessage(REQUEST_RUN_MODEL);
     }
 

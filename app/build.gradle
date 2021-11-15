@@ -77,42 +77,42 @@ task downloadAndExtractPaddleLiteLibs(type: DefaultTask) {
 }
 preBuild.dependsOn downloadAndExtractPaddleLiteLibs
 
-//def paddleLiteModels = [
-//        [
-//                'src' : 'https://bj.bcebos.com/paddleseg/deploy/lite/android/hrnet_w18_small.tar.gz',
-//                'dest' : 'src/main/assets/image_segmentation/models/for_cpu'
-//        ],
-//]
-//task downloadAndExtractPaddleLiteModels(type: DefaultTask) {
-//    doFirst {
-//        println "Downloading and extracting Paddle Lite models"
-//    }
-//    doLast {
-//        // Prepare cache folder for models
-//        if (!file("cache").exists()) {
-//            mkdir "cache"
-//        }
-//        paddleLiteModels.eachWithIndex { model, index ->
-//            MessageDigest messageDigest = MessageDigest.getInstance('MD5')
-//            messageDigest.update(model.src.bytes)
-//            String cacheName = new BigInteger(1, messageDigest.digest()).toString(32)
-//            // Download model file
-//            if (!file("cache/${cacheName}.tar.gz").exists()) {
-//                ant.get(src: model.src, dest: file("cache/${cacheName}.tar.gz"))
-//            }
-//            // Unpack model file
-//            copy {
-//                from tarTree("cache/${cacheName}.tar.gz")
-//                into "cache/${cacheName}"
-//            }
-//            // Copy model file
-//            if (!file("${model.dest}/hrnet_18_small.nb").exists()) {
-//                copy {
-//                    from "cache/${cacheName}"
-//                    into "${model.dest}"
-//                }
-//            }
-//        }
-//    }
-//}
-//preBuild.dependsOn downloadAndExtractPaddleLiteModels
+def paddleLiteModels = [
+        [
+                'src' : 'https://paddleseg.bj.bcebos.com/matting/models/deploy/hrnet_w18.tar.gz',
+                'dest' : 'src/main/assets/image_matting/models/modnet'
+        ],
+]
+task downloadAndExtractPaddleLiteModels(type: DefaultTask) {
+    doFirst {
+        println "Downloading and extracting Paddle Lite models"
+    }
+    doLast {
+        // Prepare cache folder for models
+        if (!file("cache").exists()) {
+            mkdir "cache"
+        }
+        paddleLiteModels.eachWithIndex { model, index ->
+            MessageDigest messageDigest = MessageDigest.getInstance('MD5')
+            messageDigest.update(model.src.bytes)
+            String cacheName = new BigInteger(1, messageDigest.digest()).toString(32)
+            // Download model file
+            if (!file("cache/${cacheName}.tar.gz").exists()) {
+                ant.get(src: model.src, dest: file("cache/${cacheName}.tar.gz"))
+            }
+            // Unpack model file
+            copy {
+                from tarTree("cache/${cacheName}.tar.gz")
+                into "cache/${cacheName}"
+            }
+            // Copy model file
+            if (!file("${model.dest}/hrnet_w18.nb").exists()) {
+                copy {
+                    from "cache/${cacheName}"
+                    into "${model.dest}"
+                }
+            }
+        }
+    }
+}
+preBuild.dependsOn downloadAndExtractPaddleLiteModels
